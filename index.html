@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>85210 健康密碼</title>
+
+  <!-- Reveal 5.1.0（版本固定，不要用 latest） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" />
+
+  <style>
+    /* ==========================================================
+       全域：1280×720、基準字級 40px
+       → 0.4em=16px、0.5em=20px、1.35em=54px（標題）
+       基準字級若改小，整份簡報會看起來像投影不良。
+       ========================================================== */
+    :root {
+      --accent:  #e8643a;   /* 主強調（橘紅） */
+      --accent2: #4fc3f7;   /* 次強調（青） */
+      --success: #81c784;
+      --warn:    #ffb74d;
+      --ink:     #0d1117;
+      --line:    rgba(255,255,255,0.12);
+    }
+    .reveal {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+      font-size: 40px;
+      color: #e6edf3;
+      letter-spacing: 0.01em;
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      font-weight: 900; text-transform: none; color: #fff;
+      letter-spacing: -0.01em; text-shadow: none;
+    }
+    .reveal h1 { font-size: 2.1em; line-height: 1.15; }
+    .reveal h2 { font-size: 1.35em; line-height: 1.25; margin-bottom: 0.35em; }
+    .reveal p, .reveal li { line-height: 1.65; }
+    .reveal .progress { color: var(--accent); height: 3px; }
+    .reveal .slide-number { font-size: 14px; color: #666; background: none; }
+    .reveal .fragment { opacity: 0.15; transition: all .35s ease; }
+    .reveal .fragment.visible { opacity: 1; }
+
+    /* 標題上方小標籤 */
+    .kicker {
+      display: inline-block; font-size: 0.34em; font-weight: 700;
+      letter-spacing: 0.18em; color: var(--accent2);
+      border: 1px solid rgba(79,195,247,0.35); border-radius: 999px;
+      padding: 4px 14px; margin-bottom: 0.55em;
+    }
+    .note { font-size: 0.34em; color: #8fa1b4; text-align: center; margin-top: 0.8em; }
+    .note.dim { color: #6b7d92; }
+
+    /* ==========================================================
+       背景：一律用 data-background-color / data-background-gradient
+       絕對不要把 background 寫在 section 的 CSS（section 會依內容收縮）
+       ========================================================== */
+
+    /* ============ 封面／封底 ============ */
+    .title-slide { text-align: center; }
+    .title-slide .tag {
+      display: inline-block; background: var(--accent); color: #fff;
+      padding: 5px 18px; border-radius: 999px; font-size: 0.42em;
+      letter-spacing: 0.12em; margin-bottom: 0.9em; font-weight: 700;
+    }
+    .title-slide .sub { font-size: 0.62em; color: var(--accent2); font-weight: 700; margin-bottom: 0.8em; }
+    .title-slide .desc { font-size: 0.44em; color: #9fb0c3; }
+    .title-slide .author { margin-top: 1.8em; font-size: 0.34em; color: #6b7d92; letter-spacing: 0.08em; }
+    .end-slide { text-align: center; }
+    .end-slide .big { font-size: 1.6em; margin-bottom: 0.25em; }
+    .end-slide .tagline { font-size: 0.46em; color: #9fb0c3; }
+
+    /* ============ 圖標（內嵌 SVG，取代 emoji） ============ */
+    .ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.7;
+           stroke-linecap: round; stroke-linejoin: round; display: block; }
+    .ico-wrap {
+      width: 62px; height: 62px; margin: 0 auto 10px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 34px;
+      color: var(--accent2); background: rgba(79,195,247,0.09);
+      border: 1px solid rgba(79,195,247,0.28);
+      box-shadow: 0 0 22px rgba(79,195,247,0.16) inset;
+    }
+    .ico-wrap .ico { filter: drop-shadow(0 0 8px rgba(79,195,247,0.6)); }
+    .ico-wrap.warm { color: var(--warn); background: rgba(255,183,77,0.09); border-color: rgba(255,183,77,0.3); }
+    .ico-wrap.green { color: var(--success); background: rgba(129,199,132,0.1); border-color: rgba(129,199,132,0.3); }
+
+    /* ============ 卡片格 ============ */
+    .grid { display: grid; gap: 14px; margin-top: 0.55em; }
+    .g2 { grid-template-columns: 1fr 1fr; }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    .g5 { grid-template-columns: repeat(5, 1fr); }
+    .card {
+      background: rgba(255,255,255,0.045); border: 1px solid var(--line);
+      border-radius: 12px; padding: 18px 14px; text-align: center;
+    }
+    .card .ct { font-size: 0.48em; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .card .cd { font-size: 0.4em; color: #a9b8c9; line-height: 1.55; }
+    .card.left { text-align: left; }
+
+    /* 橫幅條列 */
+    .pillar {
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(255,255,255,0.045); border-left: 4px solid var(--accent);
+      border-radius: 10px; padding: 16px 20px; text-align: left;
+    }
+    .pillar .pillar-ico .ico-wrap { margin: 0; width: 52px; height: 52px; font-size: 28px; }
+    .pillar .pt { font-size: 0.5em; font-weight: 800; color: var(--accent2); }
+    .pillar .pd { font-size: 0.42em; color: #b6c4d4; margin-top: 4px; }
+
+    /* 統計數字 */
+    .stat-row { display: flex; gap: 18px; justify-content: center; margin-top: 1em; }
+    .stat-card {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--line);
+      border-radius: 12px; padding: 20px 26px; text-align: center; flex: 1;
+    }
+    .stat-card .num { font-size: 1.6em; font-weight: 900; color: var(--accent); line-height: 1; }
+    .stat-card .label { font-size: 0.38em; color: #ccc; margin-top: 8px; }
+
+    /* 表格 */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 0.42em; margin-top: 0.5em; }
+    .tbl th, .tbl td { border: 1px solid rgba(255,255,255,0.16); padding: 8px 10px; text-align: left; }
+    .tbl th { background: rgba(79,195,247,0.12); color: var(--accent2); font-weight: 700; }
+    .tbl td { color: #c7d3e0; }
+
+    /* VS 對比 */
+    .vs-grid { display: grid; grid-template-columns: 1fr 56px 1fr; align-items: stretch; margin-top: 0.5em; }
+    .vs-col { background: rgba(255,255,255,0.045); border-radius: 12px; padding: 16px; }
+    .vs-col.left-col  { border-top: 3px solid var(--accent2); }
+    .vs-col.right-col { border-top: 3px solid var(--warn); }
+    .vs-label { font-size: 0.5em; font-weight: 800; margin-bottom: 8px; }
+    .vs-label.left { color: var(--accent2); } .vs-label.right { color: var(--warn); }
+    .vs-center { display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: 900; color: #46566a; }
+    .vs-col ul { font-size: 0.42em; list-style: none; padding: 0; margin: 0; text-align: left; }
+    .vs-col ul li { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: #c2cfdd; }
+    .vs-col ul li:last-child { border-bottom: none; }
+    .vs-col ul li::before { content: "✦ "; opacity: 0.5; }
+
+    /* 時間軸（務必 text-align:left，不然圓點會跟文字分家） */
+    .timeline { position: relative; padding-left: 34px; margin: 0.6em auto 0; max-width: 1000px; text-align: left; }
+    .timeline::before {
+      content: ''; position: absolute; left: 12px; top: 8px; bottom: 8px; width: 2px;
+      background: linear-gradient(to bottom, var(--accent2), var(--accent), transparent);
+    }
+    .timeline-item { position: relative; margin-bottom: 13px; font-size: 0.44em; }
+    .timeline-item::before {
+      content: ''; position: absolute; left: -26px; top: 6px; width: 9px; height: 9px;
+      border-radius: 50%; background: var(--accent); border: 2px solid #121a26;
+      box-shadow: 0 0 10px rgba(232,100,58,0.8);
+    }
+    .timeline-item .ti-t { color: var(--accent2); font-weight: 700; font-size: 1.12em; margin-bottom: 1px; }
+    .timeline-item .ti-d { color: #aab9c9; line-height: 1.55; }
+
+    /* 結論兩欄 */
+    .conclusion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 0.6em; }
+    .conclusion-card { border-radius: 12px; padding: 18px; font-size: 0.44em; text-align: left; }
+    .conclusion-card.positive { background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.32); }
+    .conclusion-card.caution  { background: rgba(255,183,77,0.09); border: 1px solid rgba(255,183,77,0.3); }
+    .conclusion-card .cc-title { font-size: 1.25em; font-weight: 800; margin-bottom: 10px; }
+    .conclusion-card.positive .cc-title { color: var(--accent2); }
+    .conclusion-card.caution  .cc-title { color: var(--warn); }
+    .conclusion-card ul { list-style: none; padding: 0; margin: 0; color: #c2cfdd; line-height: 1.85; }
+
+    /* ==========================================================
+       VIZ 滑桿：兩層必須「同座標」，否則拉到中間會文字互疊
+       ========================================================== */
+    .viz-stage {
+      position: relative; height: 330px; border-radius: 14px; overflow: hidden;
+      margin-top: 0.35em; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .viz-layer { position: absolute; inset: 0; }
+    #viz-a { background: linear-gradient(180deg, #0a0f16, #0c141e); }
+    #viz-b {
+      background:
+        radial-gradient(circle at 78% 18%, rgba(255,183,77,0.3), transparent 45%),
+        linear-gradient(180deg, #101a24, #0e1a1a);
+      clip-path: inset(0 100% 0 0); will-change: clip-path;
+    }
+    .vz-item { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+    .vz-ico { font-size: 54px; }
+    .vz-leaf { font-size: 132px; }
+    .vz-badge { font-size: 30px; font-weight: 900; line-height: 1.15; }
+    .vz-cap { font-size: 0.32em; letter-spacing: 0.08em; margin-top: 5px; }
+    .vz-arrow { position: absolute; transform: translate(-50%, -50%); font-size: 30px; color: var(--accent2); }
+    .dim { color: #46586c; }
+    .lit { color: var(--accent2); filter: drop-shadow(0 0 12px rgba(79,195,247,0.55)); }
+    .lit-warm { color: var(--warn); filter: drop-shadow(0 0 14px rgba(255,183,77,0.6)); }
+    .lit-green { color: var(--success); filter: drop-shadow(0 0 12px rgba(129,199,132,0.5)); }
+    .viz-divider {
+      position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--accent2), transparent);
+      box-shadow: 0 0 16px var(--accent2); pointer-events: none;
+    }
+    .viz-caption { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 0.32em; color: #8fa1b4; }
+    .viz-slider {
+      width: 100%; margin-top: 14px; -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 999px; outline: none; cursor: pointer;
+      background: linear-gradient(90deg, rgba(79,195,247,0.5), rgba(232,100,58,0.5));
+    }
+    .viz-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
+      border-radius: 50%; background: #fff; border: 3px solid var(--accent2);
+      box-shadow: 0 0 14px rgba(79,195,247,0.8); cursor: pointer;
+    }
+
+    /* ==========================================================
+       互動元件：字雲＝flex（不要用 wordcloud2，會疊字）
+       ========================================================== */
+    .wc-grid { display: grid; grid-template-columns: 250px 1fr; gap: 14px; height: 400px; margin-top: 0.3em; }
+    .wc-grid > * { min-height: 0; }
+    .wc-col { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+    .wc-panel {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px; padding: 12px;
+    }
+    .wc-input {
+      width: 100%; padding: 9px 12px; border-radius: 8px; box-sizing: border-box;
+      border: 1px solid rgba(79,195,247,0.35); background: rgba(255,255,255,0.08);
+      color: #fff; font-size: 13px; font-family: inherit; outline: none;
+    }
+    .wc-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(79,195,247,0.15); }
+    .wc-btn {
+      width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 8px;
+      background: var(--accent2); color: #08131c; font-weight: 800; font-size: 13px;
+      font-family: inherit; cursor: pointer;
+    }
+    .wc-btn:disabled { opacity: .5; cursor: default; }
+    .wc-list { font-size: 0.36em; overflow-y: auto; flex: 1; min-height: 0; color: #c2cfdd; }
+    .wc-cloud {
+      display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
+      gap: 4px 20px; height: 100%; padding: 22px 26px; box-sizing: border-box;
+      overflow: hidden; text-align: center;
+    }
+    .wc-cloud span {
+      font-weight: 900; line-height: 1.1; white-space: nowrap;
+      transition: font-size .35s ease, color .35s ease;
+      text-shadow: 0 0 24px currentColor; opacity: .95;
+    }
+    .live-dot {
+      display: inline-block; background: #ff4757; color: #fff; padding: 2px 8px;
+      border-radius: 10px; font-size: 0.85em; animation: pulse 1.6s infinite; vertical-align: middle;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+    /* 投票 */
+    .poll-opt {
+      width: 100%; padding: 13px 18px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e6edf3;
+      font-size: 0.44em; font-family: inherit; text-align: left; cursor: pointer;
+      transition: all .2s;
+    }
+    .poll-opt:hover { background: rgba(79,195,247,0.1); border-color: rgba(79,195,247,0.4); }
+    .poll-opt.correct {
+      background: rgba(129,199,132,0.16); border-color: rgba(129,199,132,0.65);
+      box-shadow: 0 0 20px rgba(129,199,132,0.18);
+    }
+    .poll-row { display: flex; align-items: center; gap: 12px; }
+    .poll-check {
+      flex: 0 0 24px; height: 24px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center;
+      justify-content: center; font-size: 13px; font-weight: 800;
+    }
+    .poll-label { flex: 1; }
+    .poll-bar-wrap { flex: 0 0 130px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    /* display:block 不可以拿掉：span 是 inline，設 width 不會有作用 */
+    .poll-bar { display: block; height: 100%; width: 0; background: var(--accent2); border-radius: 4px; transition: width .45s ease; }
+    .poll-pct { flex: 0 0 42px; text-align: right; font-size: 0.8em; color: #8fa1b4; }
+    .poll-mark { flex: 0 0 auto; font-size: 0.8em; font-weight: 800; color: var(--success); opacity: 0; transition: opacity .3s; }
+    .poll-opt.correct .poll-mark { opacity: 1; }
+    .mode-badge {
+      font-size: 0.28em; color: #6b7d92; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px; padding: 2px 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ 內嵌 SVG 圖標庫（要新增圖標就加在這裡） ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-leaf" viewBox="0 0 24 24">
+      <path d="M4 20c0-8 6-14 16-15 1 10-5 16-13 16H4z"/><path d="M4.5 19.5C8 15 12 12.5 17 11"/>
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/>
+    </symbol>
+    <symbol id="i-target" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>
+    </symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24">
+      <path d="M3 8h9a3 3 0 100-6"/><path d="M3 13h13a3 3 0 110 6"/><path d="M3 18h6"/>
+    </symbol>
+    <symbol id="i-water" viewBox="0 0 24 24">
+      <path d="M12 3s6 6.4 6 10.4A6 6 0 016 13.4C6 9.4 12 3 12 3z"/><path d="M9.5 14a2.6 2.6 0 002.5 2.6"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2"/>
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 24 24">
+      <circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+      <path d="M16 5.2a3.2 3.2 0 010 5.6M17.5 14.4c2 .7 3.5 2.4 3.5 5.6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ① 封面：[BG] 用漸層，有 AI 底圖就換成 data-background-image -->
+    <section
+      data-background-color="#0d1117"
+      data-background-image="images/cover.jpg"
+      data-background-opacity="0.38"
+      data-background-size="cover"
+      data-background-gradient="radial-gradient(circle at 15% 20%, rgba(79,195,247,0.22), transparent 42%), radial-gradient(circle at 85% 80%, rgba(232,100,58,0.22), transparent 45%), repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 44px), linear-gradient(160deg, #0d1117 0%, #101a2b 55%, #16121f 100%)">
+      <div class="title-slide">
+        <div class="tag">健康促進 · 中年級</div>
+        <h1>85210 健康密碼</h1>
+        <h2 style="color:var(--accent); font-size:0.9em; margin-top:0.1em;">五個數字，陪你健康長大</h2>
+        <p class="desc">睡飽 8、蔬果 5、螢幕少於 2、運動 1、含糖飲料 0。</p>
+        <p class="author">桃源國小</p>
+      </div>
+    </section>
+
+    <!-- ② 文字雲（互動） -->
+    <section class="bg-deep" id="slide-wordcloud" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <h2 style="font-size:1.1em;">今天你做到哪一項？用 8／5／2／1／0 回答</h2>
+      <p class="note dim" style="margin-top:0;">用一個詞回答</p>
+      <div class="wc-grid">
+        <div class="wc-col">
+          <div class="wc-panel">
+            <div style="font-size:0.36em; color:var(--accent2); font-weight:700; margin-bottom:8px;">輸入你的答案</div>
+            <input id="wc-input" class="wc-input" type="text" maxlength="20" placeholder="輸入關鍵詞…" />
+            <button id="wc-btn" class="wc-btn">送出 ↵</button>
+          </div>
+          <div class="wc-panel" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="font-size:0.36em; color:var(--accent2); font-weight:700; margin-bottom:8px;">熱門答案 <span class="live-dot">LIVE</span></div>
+            <div id="wc-list" class="wc-list"></div>
+            <div style="margin-top:8px; font-size:0.3em; color:#5c6b7d; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;">
+              總提交：<span id="wc-total" style="color:var(--accent); font-weight:700;">0</span>　
+              不同答案：<span id="wc-unique" style="color:var(--accent2); font-weight:700;">0</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.035); border-radius:12px; overflow:hidden; position:relative; border:1px solid rgba(255,255,255,0.07);">
+          <div id="wc-cloud" class="wc-cloud"></div>
+          <div id="wc-empty" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#3f4d5e; font-size:0.42em; text-align:center; pointer-events:none; line-height:2;">
+            輸入第一個答案<br>字雲就會出現 ✨
+          </div>
+        </div>
+      </div>
+      <div class="note dim">
+        <span id="wc-mode" class="mode-badge">連線中…</span>
+      </div>
+    </section>
+
+    <!-- ③ 85210 總覽 [ICON] -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-image="images/habits.jpg"
+      data-background-opacity="0.2"
+      data-background-size="cover"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">五個數字</span>
+      <h2>85210，一次看懂</h2>
+      <div class="grid g5">
+        <div class="card fragment">
+          <div class="ct" style="font-size:1em; color:var(--accent);">8</div><div class="cd">睡滿 8 小時</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct" style="font-size:1em; color:var(--accent2);">5</div><div class="cd">每天 5 份蔬果</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct" style="font-size:1em; color:var(--warn);">2</div><div class="cd">螢幕少於 2 小時</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct" style="font-size:1em; color:var(--success);">1</div><div class="cd">運動 1 小時</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct" style="font-size:1em; color:#ce93d8;">0</div><div class="cd">含糖飲料 0 杯</div>
+        </div>
+      </div>
+      <p class="note">記法：8 睡、5 蔬果、2 螢幕、1 運動、0 含糖。</p>
+    </section>
+
+    <!-- ④ 睡眠：為什麼 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">8 睡眠</span>
+      <h2>睡 8 小時，身體在偷偷做事</h2>
+      <div class="grid g3">
+        <div class="card fragment">
+          <div class="ico-wrap"><svg class="ico"><use href="#i-sun"/></svg></div>
+          <div class="ct">長高</div><div class="cd">睡熟時，身體分泌生長激素。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ico-wrap warm"><svg class="ico"><use href="#i-target"/></svg></div>
+          <div class="ct">記得住</div><div class="cd">大腦把今天學的整理好。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ico-wrap green"><svg class="ico"><use href="#i-users"/></svg></div>
+          <div class="ct">心情穩</div><div class="cd">睡不飽，隔天容易生氣。</div>
+        </div>
+      </div>
+      <p class="note">不是有睡就好，要睡滿、睡熟。</p>
+    </section>
+
+    <!-- ⑤ 睡眠：怎麼做 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">8 睡眠</span>
+      <h2>怎麼睡滿 8 小時？</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="ti-t">固定時間</div>
+          <div class="ti-d">每天同一時間上床、起床，假日也差不多。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">睡前 30 分鐘</div>
+          <div class="ti-d">關掉電視、手機、平板，讓眼睛休息。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">房間準備</div>
+          <div class="ti-d">暗、安靜、不要太熱。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">手機不上床</div>
+          <div class="ti-d">充電放在房間外，鬧鐘用時鐘。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑥ 睡眠：達標效果 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">8 睡眠 · 效果</span>
+      <h2>睡飽的達標效果</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">上課不度咕</div><div class="cd">眼睛睜得開，聽得進去。</div></div>
+        <div class="card"><div class="ct">隔天有精神</div><div class="cd">起床不痛苦，動作比較快。</div></div>
+        <div class="card"><div class="ct">比較不生氣</div><div class="cd">遇到小事，不容易爆炸。</div></div>
+      </div>
+      <p class="note">達標標準：一週至少 5 天睡滿 8 小時。</p>
+    </section>
+
+    <!-- ⑦ 蔬果：一份多少 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">5 蔬果</span>
+      <h2>5 份蔬果，一份到底是多少？</h2>
+      <div class="grid g3">
+        <div class="card fragment">
+          <div class="ico-wrap green"><svg class="ico"><use href="#i-leaf"/></svg></div>
+          <div class="ct">一份水果</div><div class="cd">一個拳頭大，例如一顆小蘋果。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ico-wrap green"><svg class="ico"><use href="#i-water"/></svg></div>
+          <div class="ct">一份青菜</div><div class="cd">半碗煮熟的青菜。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ico-wrap"><svg class="ico"><use href="#i-target"/></svg></div>
+          <div class="ct">用拳頭量</div><div class="cd">看拳頭，不看盤子大小。</div>
+        </div>
+      </div>
+      <p class="note">顏色越多越好：綠、紅、黃、白、紫。</p>
+    </section>
+
+    <!-- ⑧ 蔬果：怎麼吃 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">5 蔬果</span>
+      <h2>怎麼吃到 5 份？</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="ti-t">早餐加一份</div>
+          <div class="ti-d">香蕉、蘋果、小番茄，選一樣。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">午餐多一格</div>
+          <div class="ti-d">多夾一格青菜，不要只吃肉。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">點心換水果</div>
+          <div class="ti-d">餅乾換成水果，一樣有甜味。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">吃整顆水果</div>
+          <div class="ti-d">不喝果汁，整顆才有纖維。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑨ 蔬果：達標效果 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">5 蔬果 · 效果</span>
+      <h2>蔬果的達標效果</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">排便順</div><div class="cd">纖維幫助腸胃，上廁所不痛苦。</div></div>
+        <div class="card"><div class="ct">精神好</div><div class="cd">維生素夠，身體有力氣。</div></div>
+        <div class="card"><div class="ct">少感冒</div><div class="cd">抵抗力好，較不容易生病。</div></div>
+      </div>
+      <p class="note">達標標準：每天 5 份，一週至少 5 天。</p>
+    </section>
+
+    <!-- ⑩ 螢幕：怎麼算 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">2 螢幕</span>
+      <h2>螢幕 2 小時，怎麼算？</h2>
+      <div class="vs-grid">
+        <div class="vs-col left-col">
+          <div class="vs-label left">要算進去</div>
+          <ul>
+            <li>看影片、看電視</li>
+            <li>打遊戲、滑短影音</li>
+            <li>休閒用的手機、平板</li>
+          </ul>
+        </div>
+        <div class="vs-center">VS</div>
+        <div class="vs-col right-col">
+          <div class="vs-label right">不列入</div>
+          <ul>
+            <li>做功課查資料</li>
+            <li>但每 20 分鐘要休息</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">算的是「休閒」螢幕時間，一天加起來少於 2 小時。</p>
+    </section>
+
+    <!-- ⑪ 螢幕：怎麼減 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">2 螢幕</span>
+      <h2>怎麼減到 2 小時？</h2>
+      <div class="grid g3">
+        <div class="card fragment">
+          <div class="ct">20-20-20</div><div class="cd">每 20 分鐘，看 20 呎外 20 秒。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct">吃飯不看</div><div class="cd">吃飯時，手機放在旁邊。</div>
+        </div>
+        <div class="card fragment">
+          <div class="ct">睡前不用</div><div class="cd">睡前 1 小時關螢幕。</div>
+        </div>
+      </div>
+      <p class="note">先減最常做的那一項，比較容易成功。</p>
+    </section>
+
+    <!-- ⑫ 螢幕：達標效果 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">2 螢幕 · 效果</span>
+      <h2>少螢幕的達標效果</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">眼睛不痠</div><div class="cd">比較不會揉眼睛、流眼淚。</div></div>
+        <div class="card"><div class="ct">晚上睡得著</div><div class="cd">螢幕的光會讓人更清醒。</div></div>
+        <div class="card"><div class="ct">有時間出去玩</div><div class="cd">空出來的時間，可以運動。</div></div>
+      </div>
+      <p class="note">達標標準：休閒螢幕每天少於 2 小時，一週 5 天。</p>
+    </section>
+
+    <!-- ⑬ 運動：怎樣算 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">1 運動</span>
+      <h2>運動 1 小時，怎樣才算？</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">心跳變快</div><div class="cd">感覺心臟砰砰跳。</div></div>
+        <div class="card"><div class="ct">會流汗</div><div class="cd">額頭、背有點濕。</div></div>
+        <div class="card"><div class="ct">有點喘</div><div class="cd">說話要停一下才順。</div></div>
+      </div>
+      <p class="note">散步不算；快走、跳繩、打球才算。</p>
+    </section>
+
+    <!-- ⑭ 運動：怎麼做 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">1 運動</span>
+      <h2>怎麼湊到 1 小時？</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="ti-t">下課 10 分鐘</div>
+          <div class="ti-d">跳繩、跑一跑，不要只坐著。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">體育課</div>
+          <div class="ti-d">認真動，不要只站著看。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">上下學</div>
+          <div class="ti-d">走路或騎腳踏車。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">晚上</div>
+          <div class="ti-d">和家人散步、打球。</div>
+        </div>
+      </div>
+      <p class="note">不用一次做完，加起來 60 分鐘就達標。</p>
+    </section>
+
+    <!-- ⑮ 運動：達標效果 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">1 運動 · 效果</span>
+      <h2>運動的達標效果</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">體力變好</div><div class="cd">爬樓梯比較不喘。</div></div>
+        <div class="card"><div class="ct">上課更專注</div><div class="cd">動一動，回來坐得住。</div></div>
+        <div class="card"><div class="ct">心情變好</div><div class="cd">流汗後，壓力比較小。</div></div>
+      </div>
+      <p class="note">達標標準：每天 60 分鐘，一週至少 5 天。</p>
+    </section>
+
+    <!-- ⑯ 飲料：糖在哪 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">0 含糖</span>
+      <h2>0 含糖：糖藏在哪裡？</h2>
+      <div class="stat-row">
+        <div class="stat-card"><div class="num">12</div><div class="label">全糖珍奶 700ml<br>約 12 顆方糖</div></div>
+        <div class="stat-card"><div class="num">8</div><div class="label">可樂 330ml<br>約 8 顆方糖</div></div>
+        <div class="stat-card"><div class="num">0</div><div class="label">白開水<br>0 顆方糖</div></div>
+      </div>
+      <p class="note">一天一杯珍奶，一週就多吃進 84 顆方糖。</p>
+    </section>
+
+    <!-- ⑰ 飲料：怎麼換 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">0 含糖</span>
+      <h2>怎麼換成 0 含糖？</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="ti-t">帶水壺</div>
+          <div class="ti-d">出門自己帶，想喝就有。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">白開水最好</div>
+          <div class="ti-d">沒有糖，也不會蛀牙。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">無糖茶也可以</div>
+          <div class="ti-d">不加糖的茶，比飲料好。</div>
+        </div>
+        <div class="timeline-item">
+          <div class="ti-t">真的想喝</div>
+          <div class="ti-d">先點半糖，再慢慢改無糖。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑱ 飲料：達標效果 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">0 含糖 · 效果</span>
+      <h2>0 含糖的達標效果</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ct">不蛀牙</div><div class="cd">糖少，牙齒比較健康。</div></div>
+        <div class="card"><div class="ct">不發胖</div><div class="cd">少喝一杯，少很多熱量。</div></div>
+        <div class="card"><div class="ct">精神穩</div><div class="cd">不會一下嗨、一下累。</div></div>
+      </div>
+      <p class="note">達標標準：每天含糖飲料 0 杯，一週 7 天。</p>
+    </section>
+
+    <!-- ⑲ 小測驗（投票） -->
+    <section class="bg-deep" id="slide-poll" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">小測驗</span>
+      <h2 style="font-size:1.15em;">一杯 700ml 全糖珍奶，大約等於幾顆方糖？</h2>
+      <div id="poll-options" style="display:flex; flex-direction:column; gap:10px; margin:0.55em auto 0; max-width:980px;"></div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:18px; margin-top:0.7em;">
+        <div style="font-size:0.34em; color:#6b7d92;">已投票：<span id="poll-total" style="color:var(--accent); font-weight:700;">0</span> 人</div>
+        <button id="poll-reveal" style="font-size:0.32em; padding:7px 16px; border-radius:999px;
+          border:1px solid rgba(129,199,132,0.5); background:rgba(129,199,132,0.12);
+          color:var(--success); font-family:inherit; font-weight:700; cursor:pointer;">公布答案</button>
+      </div>
+      <p class="note dim">先讓大家猜，再公布答案；答對的選項會亮綠燈。</p>
+    </section>
+
+    <!-- ⑳ 一週挑戰表 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-gradient="radial-gradient(circle at 50% 120%, rgba(79,195,247,0.16), transparent 55%), linear-gradient(180deg, #0d1117 0%, #0f1622 100%)">
+      <span class="kicker">行動</span>
+      <h2>一週挑戰表：每天勾一勾</h2>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>要做到</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th><th>達標</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>睡滿 8 小時</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td>5 天</td></tr>
+          <tr><td>每天 5 份蔬果</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td>5 天</td></tr>
+          <tr><td>螢幕少於 2 小時</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td>5 天</td></tr>
+          <tr><td>運動 60 分鐘</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td>5 天</td></tr>
+          <tr><td>含糖飲料 0 杯</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td style="text-align:center;">□</td><td>7 天</td></tr>
+        </tbody>
+      </table>
+      <p class="note">一週 35 格，勾滿 25 格，就是健康小達人。</p>
+    </section>
+
+    <!-- ㉑ 封底 -->
+    <section class="bg-deep" data-background-color="#0d1117"
+      data-background-image="images/closing.jpg"
+      data-background-opacity="0.42"
+      data-background-size="cover"
+      data-background-gradient="radial-gradient(circle at 15% 20%, rgba(79,195,247,0.22), transparent 42%), radial-gradient(circle at 85% 80%, rgba(232,100,58,0.22), transparent 45%), linear-gradient(160deg, #0d1117 0%, #101a2b 55%, #16121f 100%)">
+      <div class="end-slide">
+        <div class="big" style="color:var(--accent2);">從今天開始，先做到一項</div>
+        <p class="tagline">你會先選哪一個？</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    width: 1280, height: 720, margin: 0.045,
+    minScale: 0.2, maxScale: 1.6,
+    transition: 'slide', backgroundTransition: 'fade',
+    center: true, progress: true, controls: true, slideNumber: 'c/t',
+    plugins: []
+  });
+
+  /* VIZ：切到該頁自動示範一次；滑桿兩層同座標才不會疊字 */
+  (function () {
+    const slider = document.getElementById('viz-slider');
+    const top = document.getElementById('viz-b');
+    const divider = document.getElementById('viz-divider');
+    if (!slider || !top) return;
+    const paint = v => {
+      top.style.clipPath = `inset(0 ${100 - v}% 0 0)`;
+      divider.style.left = v + '%';
+    };
+    slider.addEventListener('input', e => paint(+e.target.value));
+    paint(+slider.value);
+    Reveal.on('slidechanged', e => {
+      if (e.currentSlide?.id !== 'slide-viz') return;
+      let v = 0;
+      slider.value = 0; paint(0);
+      const t = setInterval(() => {
+        v = Math.min(100, v + 3);
+        slider.value = v; paint(v);
+        if (v >= 100) clearInterval(t);
+      }, 40);
+    });
+  })();
+</script>
+
+<!-- ============================================================
+     互動：字雲＋投票。本機優先，Firebase 選用，任何失敗都要能繼續上課。
+     產生新簡報時：改 SLUG、改題目文字、改 OPTIONS 與答案、改示範字。
+     所有使用者輸入一律 esc() 再進 innerHTML。
+     ============================================================ -->
+<script type="module">
+  const SLUG = 'health-85210';
+  const CFG = null;   // 沒有 Firebase 就保持 null
+
+  const COLORS = ['#4fc3f7','#e8643a','#ffb74d','#81c784','#ce93d8','#80deea','#f48fb1'];
+  const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const hash = s => { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return h; };
+  const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+  // 網址加 ?reset=1 清掉本機示範資料
+  if (new URLSearchParams(location.search).has('reset')) {
+    Object.keys(localStorage).filter(k => k.startsWith(`hsb:${SLUG}:`)).forEach(k => localStorage.removeItem(k));
+  }
+
+  /* ---------------- 文字雲 ---------------- */
+  const WC_KEY = `hsb:${SLUG}:wordcloud`;
+  let wcWords = lsGet(WC_KEY, []);
+  let wcMode = 'local';
+  let wcRemoteAdd = null;
+  const badge = document.getElementById('wc-mode');
+
+  const wcCounts = () => {
+    const c = {};
+    wcWords.forEach(w => { if (w) c[w] = (c[w] || 0) + 1; });
+    return Object.entries(c).sort((a, b) => b[1] - a[1]);
+  };
+
+  function wcRender() {
+    const data = wcCounts();
+    const totalEl = document.getElementById('wc-total');
+    const uniqEl = document.getElementById('wc-unique');
+    if (totalEl) totalEl.textContent = wcWords.length;
+    if (uniqEl) uniqEl.textContent = data.length;
+    const list = document.getElementById('wc-list');
+    if (list) {
+      list.innerHTML = data.slice(0, 12).map(([w, c]) => `
+        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <span style="color:#dbe6f1;">${esc(w)}</span>
+          <span style="color:var(--accent);font-weight:700;">${c}</span>
+        </div>`).join('') || '<div style="color:#4a5a6c;padding:8px 0;">尚無資料</div>';
+    }
+    wcDraw();
+  }
+
+  function wcDraw() {
+    const box = document.getElementById('wc-cloud');
+    if (!box) return;
+    const data = wcCounts();
+    const empty = document.getElementById('wc-empty');
+    if (empty) empty.style.display = data.length ? 'none' : '';
+    if (!data.length) { box.innerHTML = ''; return; }
+    const max = data[0][1], min = data[data.length - 1][1];
+    box.innerHTML = data.slice(0, 40).map(([w, c]) => {
+      const t = max === min ? 1 : (c - min) / (max - min);
+      const size = Math.round(20 + t * 44);                 // 20–64px
+      const color = COLORS[hash(w) % COLORS.length];
+      const rot = (hash(w + '~') % 9) - 4;                  // -4～4 度，固定不亂跳
+      return `<span style="font-size:${size}px;color:${color};transform:rotate(${rot}deg)">${esc(w)}</span>`;
+    }).join('');
+  }
+
+  async function wcSubmit() {
+    const input = document.getElementById('wc-input');
+    const btn = document.getElementById('wc-btn');
+    const word = (input.value || '').trim().slice(0, 20);
+    if (!word) return;
+    btn.disabled = true;
+    try {
+      if (wcMode === 'cloud' && wcRemoteAdd) await wcRemoteAdd(word);
+      else { wcWords.push(word); lsSet(WC_KEY, wcWords); wcRender(); }
+      input.value = '';
+    } catch (err) {
+      wcMode = 'local';
+      wcWords.push(word); lsSet(WC_KEY, wcWords); wcRender();
+    } finally {
+      btn.disabled = false; input.focus();
+    }
+  }
+
+  document.getElementById('wc-btn')?.addEventListener('click', wcSubmit);
+  document.getElementById('wc-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') wcSubmit(); });
+
+  async function initCloud() {
+    if (!CFG) {                                    // 沒設定 Firebase → 直接本機
+      if (badge) { badge.textContent = '本機模式（離線可用）'; badge.style.color = 'var(--warn)'; }
+      wcRender();
+      return;
+    }
+    try {
+      const [appMod, fsMod] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js')
+      ]);
+      const app = appMod.initializeApp(CFG);
+      const db = fsMod.getFirestore(app);
+      const ref = fsMod.collection(db, `${SLUG}_wordcloud`);
+      const q = fsMod.query(ref, fsMod.orderBy('created_at', 'asc'));
+      let unsub = null;
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('timeout')), 4500);
+        unsub = fsMod.onSnapshot(q, snap => {
+          clearTimeout(timer);
+          wcMode = 'cloud';
+          wcWords = snap.docs.map(d => (d.data().word || '').trim()).filter(Boolean);
+          wcRender();
+          resolve();
+        }, err => { clearTimeout(timer); unsub?.(); reject(err); });
+      });
+      wcRemoteAdd = async word => fsMod.addDoc(ref, { word, created_at: fsMod.serverTimestamp() });
+      if (badge) { badge.textContent = 'Firebase 連線中'; badge.style.color = 'var(--success)'; }
+    } catch (err) {
+      console.warn('[wordcloud] Firebase 不可用 → 本機模式', err);
+      wcMode = 'local';
+      if (badge) { badge.textContent = '本機模式（離線可用）'; badge.style.color = 'var(--warn)'; }
+      if (!wcWords.length) {                       // 示範資料，讓畫面不是空的
+        lsSet(WC_KEY, ['示範答案一','示範答案一','示範答案一','示範答案二','示範答案二','示範答案三']);
+        wcWords = lsGet(WC_KEY, []);
+      }
+      wcRender();
+    }
+  }
+
+  /* ---------------- 投票 ---------------- */
+  const POLL_KEY = `hsb:${SLUG}:poll`;
+  const MYVOTE_KEY = `hsb:${SLUG}:myvote`;
+  const POLL_ANSWER = 'c';               // 例如 'b'
+  const OPTIONS = [
+    { id: 'a', label: "3 顆" },
+    { id: 'b', label: "6 顆" },
+    { id: 'c', label: "12 顆" },
+    { id: 'd', label: "20 顆" }
+  ];
+  const pollVotes = lsGet(POLL_KEY, {});
+  let pollMode = 'local';
+  let pollRemoteSet = null;
+  let myVote = lsGet(MYVOTE_KEY, null);
+  const me = 'v_' + Math.random().toString(36).slice(2, 9);
+
+  function buildPoll() {
+    const box = document.getElementById('poll-options');
+    if (!box) return;
+    box.innerHTML = '';
+    OPTIONS.forEach(o => {
+      const btn = document.createElement('button');
+      btn.className = 'poll-opt';
+      btn.id = `poll-btn-${o.id}`;
+      btn.innerHTML = `
+        <div class="poll-row">
+          <span class="poll-check" id="poll-check-${o.id}"></span>
+          <span class="poll-label">${esc(o.label)}</span>
+          <span class="poll-bar-wrap"><span class="poll-bar" id="poll-bar-${o.id}"></span></span>
+          <span class="poll-pct" id="poll-pct-${o.id}">0%</span>
+          <span class="poll-mark">✓</span>
+        </div>`;
+      btn.addEventListener('click', () => vote(o.id));
+      box.appendChild(btn);
+    });
+    document.getElementById('poll-reveal')?.addEventListener('click', () => {
+      document.getElementById(`poll-btn-${POLL_ANSWER}`)?.classList.add('correct');
+    });
+  }
+
+  function paintPoll() {
+    const counts = {};
+    OPTIONS.forEach(o => counts[o.id] = 0);
+    Object.values(pollVotes).forEach(v => { if (counts[v] !== undefined) counts[v]++; });
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const totalEl = document.getElementById('poll-total');
+    if (totalEl) totalEl.textContent = total;
+    OPTIONS.forEach(o => {
+      const pct = total ? Math.round((counts[o.id] / total) * 100) : 0;
+      const bar = document.getElementById(`poll-bar-${o.id}`);
+      const pctEl = document.getElementById(`poll-pct-${o.id}`);
+      if (bar) bar.style.width = pct + '%';
+      if (pctEl) pctEl.textContent = pct + '%';
+      const check = document.getElementById(`poll-check-${o.id}`);
+      if (check) {
+        const mine = myVote === o.id;
+        check.textContent = mine ? '✓' : '';
+        check.style.background = mine ? 'var(--accent2)' : 'transparent';
+        check.style.borderColor = mine ? 'var(--accent2)' : 'rgba(255,255,255,0.3)';
+      }
+    });
+  }
+
+  async function vote(id) {
+    myVote = id; lsSet(MYVOTE_KEY, id);
+    if (pollMode === 'cloud' && pollRemoteSet) {
+      try { await pollRemoteSet(id); }
+      catch { pollVotes[me] = id; lsSet(POLL_KEY, pollVotes); }
+    } else {
+      pollVotes[me] = id; lsSet(POLL_KEY, pollVotes);
+    }
+    paintPoll();
+  }
+
+  async function initPoll() {
+    buildPoll(); paintPoll();
+    if (myVote) pollVotes[me] = myVote;
+    if (!CFG) return;
+    try {
+      const [appMod, fsMod] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js')
+      ]);
+      const app = appMod.initializeApp(CFG, 'pollApp');
+      const db = fsMod.getFirestore(app);
+      const ref = fsMod.doc(db, `${SLUG}_poll`, 'results');
+      let unsub = null;
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('timeout')), 4500);
+        unsub = fsMod.onSnapshot(ref, snap => {
+          clearTimeout(timer);
+          pollMode = 'cloud';
+          const votes = (snap.data() || {}).votes || {};
+          Object.keys(pollVotes).forEach(k => delete pollVotes[k]);
+          Object.assign(pollVotes, votes);
+          if (myVote) pollVotes[me] = myVote;
+          paintPoll(); resolve();
+        }, err => { clearTimeout(timer); unsub?.(); reject(err); });
+      });
+      pollRemoteSet = async id => fsMod.setDoc(ref, {
+        votes: { [me]: id }, updated_at: fsMod.serverTimestamp()
+      }, { merge: true });
+    } catch (err) {
+      console.warn('[poll] Firebase 不可用 → 本機模式', err);
+      pollMode = 'local'; paintPoll();
+    }
+  }
+
+  initCloud(); initPoll();
+
+  Reveal.on('slidechanged', e => {
+    if (e.currentSlide?.id === 'slide-wordcloud') setTimeout(wcDraw, 160);
+    if (e.currentSlide?.id === 'slide-poll') paintPoll();
+  });
+  Reveal.on('ready', () => { wcRender(); paintPoll(); setTimeout(wcDraw, 200); });
+</script>
+
+</body>
+</html>
